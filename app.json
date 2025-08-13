@@ -31,7 +31,8 @@
       "backgroundColor": "#ffffff",
       "startUrl": ".",
       "scope": ".",
-      "lang": "en"
+      "lang": "en",
+      "baseUrl": "/VTeam/"
     }
   }
 }
