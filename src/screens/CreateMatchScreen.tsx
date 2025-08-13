@@ -14,6 +14,7 @@ import {
   useTheme,
 } from 'react-native-paper';
 
+
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FlashList } from '@shopify/flash-list';
 import { useNavigation } from '@react-navigation/native';
