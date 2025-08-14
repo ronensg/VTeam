@@ -234,43 +234,43 @@ Jane Smith,6,9,7,8,7,9,Team B,Excellent setter,available`;
         <View style={styles.skillsContainer}>
           <View style={styles.skillRow}>
             <Text variant="bodySmall" style={styles.skillLabel}>Serve:</Text>
-            <View style={styles.skillBar}>
-              <View style={[styles.skillFill, { width: `${player.serve * 10}%` }]} />
+            <View style={[styles.skillBar, { backgroundColor: theme.colors.outline }]}>
+              <View style={[styles.skillFill, { width: `${player.serve * 10}%`, backgroundColor: theme.colors.primary }]} />
             </View>
             <Text variant="bodySmall" style={styles.skillValue}>{player.serve}</Text>
           </View>
           <View style={styles.skillRow}>
             <Text variant="bodySmall" style={styles.skillLabel}>Set:</Text>
-            <View style={styles.skillBar}>
-              <View style={[styles.skillFill, { width: `${player.set * 10}%` }]} />
+            <View style={[styles.skillBar, { backgroundColor: theme.colors.outline }]}>
+              <View style={[styles.skillFill, { width: `${player.set * 10}%`, backgroundColor: theme.colors.primary }]} />
             </View>
             <Text variant="bodySmall" style={styles.skillValue}>{player.set}</Text>
           </View>
           <View style={styles.skillRow}>
             <Text variant="bodySmall" style={styles.skillLabel}>Block:</Text>
-            <View style={styles.skillBar}>
-              <View style={[styles.skillFill, { width: `${player.block * 10}%` }]} />
+            <View style={[styles.skillBar, { backgroundColor: theme.colors.outline }]}>
+              <View style={[styles.skillFill, { width: `${player.block * 10}%`, backgroundColor: theme.colors.primary }]} />
             </View>
             <Text variant="bodySmall" style={styles.skillValue}>{player.block}</Text>
           </View>
           <View style={styles.skillRow}>
             <Text variant="bodySmall" style={styles.skillLabel}>Receive:</Text>
-            <View style={styles.skillBar}>
-              <View style={[styles.skillFill, { width: `${player.receive * 10}%` }]} />
+            <View style={[styles.skillBar, { backgroundColor: theme.colors.outline }]}>
+              <View style={[styles.skillFill, { width: `${player.receive * 10}%`, backgroundColor: theme.colors.primary }]} />
             </View>
             <Text variant="bodySmall" style={styles.skillValue}>{player.receive}</Text>
           </View>
           <View style={styles.skillRow}>
             <Text variant="bodySmall" style={styles.skillLabel}>Attack:</Text>
-            <View style={styles.skillBar}>
-              <View style={[styles.skillFill, { width: `${player.attack * 10}%` }]} />
+            <View style={[styles.skillBar, { backgroundColor: theme.colors.outline }]}>
+              <View style={[styles.skillFill, { width: `${player.attack * 10}%`, backgroundColor: theme.colors.primary }]} />
             </View>
             <Text variant="bodySmall" style={styles.skillValue}>{player.attack}</Text>
           </View>
           <View style={styles.skillRow}>
             <Text variant="bodySmall" style={styles.skillLabel}>Defense:</Text>
-            <View style={styles.skillBar}>
-              <View style={[styles.skillFill, { width: `${player.defense * 10}%` }]} />
+            <View style={[styles.skillBar, { backgroundColor: theme.colors.outline }]}>
+              <View style={[styles.skillFill, { width: `${player.defense * 10}%`, backgroundColor: theme.colors.primary }]} />
             </View>
             <Text variant="bodySmall" style={styles.skillValue}>{player.defense}</Text>
           </View>
@@ -508,14 +508,12 @@ Jane Smith,6,9,7,8,7,9,Team B,Excellent setter,available`;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: 'white',
     elevation: 2,
   },
   title: {
@@ -527,9 +525,7 @@ const styles = StyleSheet.create({
   },
   filtersContainer: {
     padding: 16,
-    backgroundColor: 'white',
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
   },
   searchBar: {
     marginBottom: 12,
@@ -591,13 +587,11 @@ const styles = StyleSheet.create({
   skillBar: {
     flex: 1,
     height: 8,
-    backgroundColor: '#e0e0e0',
     borderRadius: 4,
     marginRight: 8,
   },
   skillFill: {
     height: '100%',
-    backgroundColor: '#2196F3',
     borderRadius: 4,
   },
   skillValue: {
@@ -617,7 +611,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   teamChip: {
-    backgroundColor: '#e3f2fd',
+    // Theme colors will be applied automatically
   },
   chipText: {
     fontSize: 12,

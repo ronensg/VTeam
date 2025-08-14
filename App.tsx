@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
-import { Provider as PaperProvider, MD3DarkTheme, MD3LightTheme } from 'react-native-paper';
-import { View, useColorScheme } from 'react-native';
+import { Provider as PaperProvider, MD3LightTheme } from 'react-native-paper';
+import { View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 
@@ -28,32 +28,15 @@ const CreateMatchStack = () => (
 );
 
 export default function App() {
-  const colorScheme = useColorScheme();
-  const [isDark, setIsDark] = useState(false);
-
-  useEffect(() => {
-    // Check if we're on web and detect system theme
-    if (typeof window !== 'undefined') {
-      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-      setIsDark(mediaQuery.matches);
-      
-      const handler = (e: MediaQueryListEvent) => setIsDark(e.matches);
-      mediaQuery.addEventListener('change', handler);
-      return () => mediaQuery.removeEventListener('change', handler);
-    } else {
-      // Fallback to React Native's color scheme
-      setIsDark(colorScheme === 'dark');
-    }
-  }, [colorScheme]);
-
-  const theme = isDark ? MD3DarkTheme : MD3LightTheme;
+  // Always use light theme for bright background with dark text
+  const theme = MD3LightTheme;
 
   return (
     <SafeAreaProvider>
       <PaperProvider theme={theme}>
         <DatabaseProvider>
           <NavigationContainer>
-            <StatusBar style={isDark ? "light" : "dark"} />
+            <StatusBar style="dark" />
             <Tab.Navigator
               screenOptions={{
                 headerShown: false,
