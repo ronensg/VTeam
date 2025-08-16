@@ -47,7 +47,22 @@ export default function App() {
         return originalFetch.call(this, url, init);
       };
 
-      // Note: XMLHttpRequest override removed due to TypeScript complexity
+      // Also override the global asset loading function that Expo uses
+      if ((window as any).__EXPO_ASSET_MANIFEST__) {
+        console.log('Expo asset manifest found, patching asset paths...');
+        const originalManifest = (window as any).__EXPO_ASSET_MANIFEST__;
+        (window as any).__EXPO_ASSET_MANIFEST__ = new Proxy(originalManifest, {
+          get(target, prop) {
+            const value = target[prop];
+            if (typeof value === 'string' && value.includes('/assets/') && !value.includes('/VTeam/')) {
+              const patchedValue = value.replace('/assets/', '/VTeam/assets/');
+              console.log('Patching asset manifest path from:', value, 'to:', patchedValue);
+              return patchedValue;
+            }
+            return value;
+          }
+        });
+      }
 
       // Ensure MaterialIcons font is loaded on web
       const link = document.createElement('link');
