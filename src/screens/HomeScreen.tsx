@@ -147,6 +147,13 @@ const HomeScreen: React.FC = () => {
             </Card.Content>
           </Card>
         </View>
+
+        {/* Version Info */}
+        <View style={styles.versionContainer}>
+          <Text variant="bodySmall" style={styles.versionText}>
+            Ver. 1.0.1
+          </Text>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -242,6 +249,15 @@ const styles = StyleSheet.create({
   },
   tipCard: {
     borderRadius: 8,
+  },
+  versionContainer: {
+    alignItems: 'center',
+    marginTop: 16,
+    marginBottom: 24,
+  },
+  versionText: {
+    opacity: 0.6,
+    fontStyle: 'italic',
   },
 });
 
