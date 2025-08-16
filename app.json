@@ -29,10 +29,7 @@
       "display": "standalone",
       "themeColor": "#1976d2",
       "backgroundColor": "#ffffff",
-      "startUrl": "/VTeam/",
-      "scope": "/VTeam/",
-      "lang": "en",
-      "baseUrl": "/VTeam/"
+      "lang": "en"
     }
   }
 }
