@@ -39,6 +39,14 @@ export default function App() {
       link.href = 'https://fonts.googleapis.com/icon?family=Material+Icons';
       link.rel = 'stylesheet';
       document.head.appendChild(link);
+      
+      // Also try to load the local font files with correct paths
+      const fontFace = new FontFace('MaterialIcons', `url(/VTeam/assets/node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/MaterialIcons.4e85bc9ebe07e0340c9c4fc2f6c38908.ttf)`);
+      fontFace.load().then(() => {
+        (document.fonts as any).add(fontFace);
+      }).catch((error) => {
+        console.log('Local font loading failed, using Google Fonts:', error);
+      });
     }
   }, []);
 
