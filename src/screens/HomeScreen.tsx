@@ -151,7 +151,7 @@ const HomeScreen: React.FC = () => {
         {/* Version Info */}
         <View style={styles.versionContainer}>
           <Text variant="bodySmall" style={styles.versionText}>
-            Ver. 1.0.3
+            Ver. 1.0.4
           </Text>
         </View>
       </ScrollView>
