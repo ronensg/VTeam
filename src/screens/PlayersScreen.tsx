@@ -131,32 +131,72 @@ const PlayersScreen: React.FC = () => {
 
   const handleImportCSV = async () => {
     try {
-      // For mobile web browsers, we need to handle file input differently
+      // Check if we're on mobile web browser
+      const isMobileWeb = Platform.OS === 'web' && (
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+        window.innerWidth <= 768
+      );
+
       if (Platform.OS === 'web') {
-        // Create a file input element for mobile web compatibility
+        // Create a file input element for web compatibility
         const fileInput = document.createElement('input');
         fileInput.type = 'file';
         fileInput.accept = '.csv,text/csv';
         fileInput.style.display = 'none';
         
+        // Add mobile-specific attributes for better compatibility
+        if (isMobileWeb) {
+          fileInput.setAttribute('capture', 'filesystem');
+          fileInput.setAttribute('webkitdirectory', 'false');
+          // Additional mobile attributes
+          fileInput.setAttribute('accept', '.csv,text/csv,application/csv');
+          fileInput.setAttribute('multiple', 'false');
+        }
+        
         fileInput.onchange = async (event) => {
           const target = event.target as HTMLInputElement;
           const file = target.files?.[0];
           
-          if (!file) return;
+          if (!file) {
+            Alert.alert('No File Selected', 'Please select a CSV file to import.');
+            return;
+          }
+          
+          // Debug info
+          console.log('File selected:', file.name, 'Size:', file.size, 'Type:', file.type);
           
           try {
-            const text = await file.text();
-            const importResult = await importPlayersFromCSV(text);
+            // Use FileReader for better mobile compatibility
+            const reader = new FileReader();
             
-            Alert.alert(
-              'Import Complete',
-              `Successfully imported ${importResult.success} players.\n${importResult.errors.length > 0 ? `\nErrors: ${importResult.errors.join(', ')}` : ''}`
-            );
+            reader.onload = async (e) => {
+              try {
+                const csvContent = e.target?.result as string;
+                console.log('CSV content length:', csvContent.length);
+                
+                const importResult = await importPlayersFromCSV(csvContent);
+                
+                Alert.alert(
+                  'Import Complete',
+                  `Successfully imported ${importResult.success} players.\n${importResult.errors.length > 0 ? `\nErrors: ${importResult.errors.join(', ')}` : ''}`
+                );
+                
+                setShowImportDialog(false);
+              } catch (error) {
+                console.error('CSV processing error:', error);
+                Alert.alert('Error', `Failed to process CSV file: ${error}`);
+              }
+            };
             
-            setShowImportDialog(false);
+            reader.onerror = (error) => {
+              console.error('FileReader error:', error);
+              Alert.alert('Error', 'Failed to read CSV file. Please try again.');
+            };
+            
+            reader.readAsText(file);
           } catch (error) {
-            Alert.alert('Error', 'Failed to import CSV file');
+            console.error('File handling error:', error);
+            Alert.alert('Error', `Failed to handle file: ${error}`);
           }
           
           // Clean up
@@ -165,7 +205,22 @@ const PlayersScreen: React.FC = () => {
         
         // Add to DOM and trigger click
         document.body.appendChild(fileInput);
-        fileInput.click();
+        
+        // Try to trigger file selection
+        try {
+          fileInput.click();
+        } catch (error) {
+          console.error('File input click failed:', error);
+          // Fallback: show manual instructions
+          Alert.alert(
+            'File Selection Issue',
+            'Please manually select your CSV file. If you continue to have issues, try:\n\n1. Refreshing the page\n2. Using a different browser\n3. Checking file permissions',
+            [
+              { text: 'OK', style: 'default' },
+              { text: 'Try Again', onPress: () => fileInput.click() }
+            ]
+          );
+        }
       } else {
         // Native mobile app handling
         const result = await DocumentPicker.getDocumentAsync({
