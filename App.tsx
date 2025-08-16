@@ -34,6 +34,8 @@ export default function App() {
   // Load icon fonts on web
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      console.log('Setting up font loading for web...');
+      
       // Override the font loading paths to use correct /VTeam/ prefix
       const originalFetch = window.fetch;
       window.fetch = function(input, init) {
@@ -45,13 +47,16 @@ export default function App() {
         return originalFetch.call(this, url, init);
       };
 
+      // Note: XMLHttpRequest override removed due to TypeScript complexity
+
       // Ensure MaterialIcons font is loaded on web
       const link = document.createElement('link');
       link.href = 'https://fonts.googleapis.com/icon?family=Material+Icons';
       link.rel = 'stylesheet';
       document.head.appendChild(link);
+      console.log('Google Fonts link added');
       
-      // Also try to load the local font files with correct paths
+      // Try to load the local font files with correct paths
       const fontFace = new FontFace('MaterialIcons', `url(/VTeam/assets/node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/MaterialIcons.4e85bc9ebe07e0340c9c4fc2f6c38908.ttf)`);
       fontFace.load().then(() => {
         (document.fonts as any).add(fontFace);
@@ -59,6 +64,8 @@ export default function App() {
       }).catch((error) => {
         console.log('Local font loading failed, using Google Fonts:', error);
       });
+      
+      console.log('Font loading setup complete');
     }
   }, []);
 
