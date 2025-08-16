@@ -131,26 +131,62 @@ const PlayersScreen: React.FC = () => {
 
   const handleImportCSV = async () => {
     try {
-      const result = await DocumentPicker.getDocumentAsync({
-        type: 'text/csv',
-        copyToCacheDirectory: true,
-      });
+      // For mobile web browsers, we need to handle file input differently
+      if (Platform.OS === 'web') {
+        // Create a file input element for mobile web compatibility
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = '.csv,text/csv';
+        fileInput.style.display = 'none';
+        
+        fileInput.onchange = async (event) => {
+          const target = event.target as HTMLInputElement;
+          const file = target.files?.[0];
+          
+          if (!file) return;
+          
+          try {
+            const text = await file.text();
+            const importResult = await importPlayersFromCSV(text);
+            
+            Alert.alert(
+              'Import Complete',
+              `Successfully imported ${importResult.success} players.\n${importResult.errors.length > 0 ? `\nErrors: ${importResult.errors.join(', ')}` : ''}`
+            );
+            
+            setShowImportDialog(false);
+          } catch (error) {
+            Alert.alert('Error', 'Failed to import CSV file');
+          }
+          
+          // Clean up
+          document.body.removeChild(fileInput);
+        };
+        
+        // Add to DOM and trigger click
+        document.body.appendChild(fileInput);
+        fileInput.click();
+      } else {
+        // Native mobile app handling
+        const result = await DocumentPicker.getDocumentAsync({
+          type: 'text/csv',
+          copyToCacheDirectory: true,
+        });
 
-      if (result.canceled || !result.assets[0]) return;
+        if (result.canceled || !result.assets[0]) return;
 
-      const fileUri = result.assets[0].uri;
-      const csvContent = Platform.OS === 'web'
-        ? await (await fetch(fileUri)).text()
-        : await FileSystem.readAsStringAsync(fileUri);
-      
-      const importResult = await importPlayersFromCSV(csvContent);
-      
-      Alert.alert(
-        'Import Complete',
-        `Successfully imported ${importResult.success} players.\n${importResult.errors.length > 0 ? `\nErrors: ${importResult.errors.join(', ')}` : ''}`
-      );
-      
-      setShowImportDialog(false);
+        const fileUri = result.assets[0].uri;
+        const csvContent = await FileSystem.readAsStringAsync(fileUri);
+        
+        const importResult = await importPlayersFromCSV(csvContent);
+        
+        Alert.alert(
+          'Import Complete',
+          `Successfully imported ${importResult.success} players.\n${importResult.errors.length > 0 ? `\nErrors: ${importResult.errors.join(', ')}` : ''}`
+        );
+        
+        setShowImportDialog(false);
+      }
     } catch (error) {
       Alert.alert('Error', 'Failed to import CSV file');
     }
@@ -161,8 +197,21 @@ const PlayersScreen: React.FC = () => {
 John Doe,7,8,6,7,9,8,Team A,Great attacker,available
 Jane Smith,6,9,7,8,7,9,Team B,Excellent setter,available`;
     
-    // In a real app, you'd use a file download library
-    Alert.alert('CSV Template', 'Copy this template:\n\n' + template);
+    if (Platform.OS === 'web') {
+      // Create downloadable CSV for web browsers
+      const blob = new Blob([template], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'volleyball-players-template.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } else {
+      // For native apps, show in alert
+      Alert.alert('CSV Template', 'Copy this template:\n\n' + template);
+    }
   };
 
   const openEditDialog = (player: Player) => {
@@ -490,14 +539,31 @@ Jane Smith,6,9,7,8,7,9,Team B,Excellent setter,available`;
         <Dialog visible={showImportDialog} onDismiss={() => setShowImportDialog(false)}>
           <Dialog.Title>Import Players from CSV</Dialog.Title>
           <Dialog.Content>
-            <Text variant="bodyMedium">
+            <Text variant="bodyMedium" style={{ marginBottom: 16 }}>
               Select a CSV file with player data. The file should have columns for:
               Name, Serve, Set, Block, Receive, Attack, Defense, Teams, Notes, Availability
             </Text>
+            
+            {Platform.OS === 'web' && (
+              <Text variant="bodySmall" style={{ color: theme.colors.primary, marginBottom: 16 }}>
+                💡 Tip: On mobile, tap the Import button to open file selection
+              </Text>
+            )}
+            
+            <Button 
+              mode="outlined" 
+              onPress={downloadCSVTemplate}
+              icon="download"
+              style={{ marginBottom: 16 }}
+            >
+              Download CSV Template
+            </Button>
           </Dialog.Content>
           <Dialog.Actions>
             <Button onPress={() => setShowImportDialog(false)}>Cancel</Button>
-            <Button onPress={handleImportCSV}>Import</Button>
+            <Button onPress={handleImportCSV} mode="contained">
+              {Platform.OS === 'web' ? 'Select CSV File' : 'Import CSV'}
+            </Button>
           </Dialog.Actions>
         </Dialog>
       </Portal>
