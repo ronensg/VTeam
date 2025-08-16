@@ -39,13 +39,7 @@ const HomeScreen: React.FC = () => {
       action: () => navigation.navigate('Teams' as never),
       color: '#4CAF50',
     },
-    {
-      title: 'Match Templates',
-      description: 'Save and reuse match configurations',
-      icon: '📋',
-      action: () => navigation.navigate('Templates' as never),
-      color: '#FF9800',
-    },
+
   ];
 
   return (

@@ -12,7 +12,6 @@ import PlayersScreen from './src/screens/PlayersScreen';
 import TeamManagementScreen from './src/screens/TeamManagementScreen';
 import CreateMatchScreen from './src/screens/CreateMatchScreen';
 import GeneratedTeamsScreen from './src/screens/GeneratedTeamsScreen';
-import MatchTemplatesScreen from './src/screens/MatchTemplatesScreen';
 
 import { DatabaseProvider } from './src/services/DatabaseContext';
 
@@ -85,16 +84,6 @@ export default function App() {
                   tabBarLabel: 'Match',
                   tabBarIcon: ({ color, size }) => (
                     <TabIcon name="sports-volleyball" color={color} size={size} />
-                  ),
-                }}
-              />
-              <Tab.Screen 
-                name="Templates" 
-                component={MatchTemplatesScreen}
-                options={{
-                  tabBarLabel: 'Templates',
-                  tabBarIcon: ({ color, size }) => (
-                    <TabIcon name="template" color={color} size={size} />
                   ),
                 }}
               />
