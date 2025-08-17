@@ -69,7 +69,69 @@ export default function App() {
         }
       };
 
-      // 1. Override the fetch function to log ALL font requests
+      // NEW APPROACH: Create a global icon mapping that doesn't depend on font loading
+      logFontEvent('ICON_MAPPING', 'Creating global icon mapping for MaterialIcons');
+      
+      // Create a global icon mapping object
+      (window as any).__MATERIAL_ICONS__ = {
+        // Common icons used in the app
+        'home': '🏠',
+        'people': '👥',
+        'groups': '🏆',
+        'sports-volleyball': '🏐',
+        'add': '➕',
+        'edit': '✏️',
+        'delete': '🗑️',
+        'more-vert': '⋮',
+        'upload': '📤',
+        'download': '📥',
+        'plus': '➕',
+        'close': '❌',
+        'check': '✅',
+        'arrow-back': '⬅️',
+        'arrow-forward': '➡️',
+        'menu': '☰',
+        'search': '🔍',
+        'filter-list': '🔧',
+        'sort': '📊',
+        'refresh': '🔄',
+        'settings': '⚙️',
+        'help': '❓',
+        'info': 'ℹ️',
+        'warning': '⚠️',
+        'error': '❌',
+        'success': '✅'
+      };
+
+      // Override the MaterialIcons component to use our mapping
+      const originalMaterialIcons = (window as any).MaterialIcons;
+      if (originalMaterialIcons) {
+        logFontEvent('ICON_OVERRIDE', 'Overriding MaterialIcons component with fallback icons');
+        
+        // Create a proxy that intercepts icon requests
+        (window as any).MaterialIcons = new Proxy(originalMaterialIcons, {
+          get(target, prop) {
+            if (prop === 'render') {
+              return function(this: any, props: any) {
+                const iconName = props.name;
+                const fallbackIcon = (window as any).__MATERIAL_ICONS__[iconName];
+                
+                if (fallbackIcon) {
+                  logFontEvent('ICON_FALLBACK', `Using fallback icon for: ${iconName}`, undefined, `Fallback: ${fallbackIcon}`);
+                  // Return a simple text element as fallback
+                  return fallbackIcon;
+                }
+                
+                // If no fallback, try the original
+                return target.render.call(this, props);
+              };
+            }
+            return target[prop];
+          }
+        });
+      }
+
+      // 1. Override the fetch function to redirect ALL font requests
       const originalFetch = window.fetch;
       window.fetch = function(input, init) {
         let url = input as string;
@@ -78,7 +140,7 @@ export default function App() {
           if (url.includes('MaterialIcons') || url.includes('materialicons') || url.includes('.ttf') || url.includes('.woff')) {
             logFontEvent('FETCH_REQUEST', 'Font request detected', url);
             
-            // Redirect to Google Fonts
+            // Redirect any font requests to Google Fonts
             if (url.includes('MaterialIcons') || url.includes('materialicons') || 
                 (url.includes('/assets/') && url.includes('.ttf'))) {
               const originalUrl = url;
@@ -245,12 +307,13 @@ export default function App() {
       };
 
       // 10. Log the setup completion
-      logFontEvent('SETUP_COMPLETE', 'Comprehensive font loading logging setup complete');
+      logFontEvent('SETUP_COMPLETE', 'Comprehensive font loading logging setup complete with icon fallback mapping');
       
       console.log('[FONT-LOG] Setup complete. Available functions:');
       console.log('[FONT-LOG] - window.downloadFontLog() - Download log as JSON file');
       console.log('[FONT-LOG] - window.showFontLog() - Display latest 20 entries in console');
       console.log('[FONT-LOG] - window.getFontLogSummary() - Get log summary and statistics');
+      console.log('[FONT-LOG] - Global icon mapping created with fallback icons');
       console.log('[FONT-LOG] Log entries will be saved to localStorage every 10 entries.');
     }
   }, []);
