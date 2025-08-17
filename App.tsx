@@ -39,10 +39,10 @@ export default function App() {
       // Simple approach: Load MaterialIcons font directly with correct path
       const loadMaterialIconsFont = async () => {
         try {
-          // Create a FontFace with the correct path
+          // Create a FontFace with the correct Google Fonts URL for Material Icons
           const fontFace = new FontFace(
             'MaterialIcons',
-            'url(https://fonts.googleapis.com/icon?family=Material+Icons)'
+            'url(https://fonts.gstatic.com/s/materialicons/v140/flUhRq6tzZclQEJ-Vdg-IuiaDsNc.woff2)'
           );
           
           // Load the font
