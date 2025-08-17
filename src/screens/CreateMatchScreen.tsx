@@ -114,13 +114,32 @@ const CreateMatchScreen: React.FC = () => {
   };
 
   const handlePlayerToggle = (playerId: string) => {
+    console.log('Toggling player:', playerId, 'Current selected:', Array.from(selectedPlayers));
     const newSelected = new Set(selectedPlayers);
     if (newSelected.has(playerId)) {
       newSelected.delete(playerId);
+      console.log('Removed player:', playerId);
     } else {
       newSelected.add(playerId);
+      console.log('Added player:', playerId);
     }
     setSelectedPlayers(newSelected);
+    console.log('New selected set:', Array.from(newSelected));
+  };
+
+  const handleAvailabilityToggle = async (playerId: string) => {
+    try {
+      const player = players.find(p => p.id === playerId);
+      if (player) {
+        const newAvailability = player.availability === 'available' ? 'unavailable' : 'available';
+        // Update the player's availability in the database
+        // This would require adding an updatePlayer function to your database context
+        console.log('Toggling availability for player:', playerId, 'to:', newAvailability);
+        // For now, we'll just log it - you'll need to implement the actual update
+      }
+    } catch (error) {
+      console.error('Error toggling availability:', error);
+    }
   };
 
   const handleGenerateTeams = () => {
@@ -153,7 +172,8 @@ const CreateMatchScreen: React.FC = () => {
         { 
           opacity: player.availability === 'unavailable' ? 0.6 : 1,
           borderColor: selectedPlayers.has(player.id) ? theme.colors.primary : 'transparent',
-          borderWidth: selectedPlayers.has(player.id) ? 2 : 0,
+          borderWidth: selectedPlayers.has(player.id) ? 3 : 0,
+          backgroundColor: selectedPlayers.has(player.id) ? theme.colors.primaryContainer : theme.colors.surface,
         }
       ]}
       onPress={() => handlePlayerToggle(player.id)}
@@ -161,20 +181,61 @@ const CreateMatchScreen: React.FC = () => {
       <Card.Content>
         <View style={styles.playerHeader}>
           <View style={styles.playerInfo}>
-            <Text variant="titleMedium" style={styles.playerName}>
+            <Text variant="titleMedium" style={[
+              styles.playerName,
+              { color: selectedPlayers.has(player.id) ? theme.colors.onPrimaryContainer : theme.colors.onSurface }
+            ]}>
               {player.name}
             </Text>
-            <Text variant="bodySmall" style={styles.playerScore}>
+            <Text variant="bodySmall" style={[
+              styles.playerScore,
+              { color: selectedPlayers.has(player.id) ? theme.colors.onPrimaryContainer : theme.colors.onSurface }
+            ]}>
               Total Score: {Math.round((player.serve + player.set + player.block + player.receive + player.attack + player.defense) * 100) / 100}
             </Text>
-            <Text variant="bodySmall" style={styles.playerAvailability}>
+            <Text variant="bodySmall" style={[
+              styles.playerAvailability,
+              { color: selectedPlayers.has(player.id) ? theme.colors.onPrimaryContainer : theme.colors.onSurface }
+            ]}>
               Availability: {player.availability === 'available' ? '✅ Available' : '❌ Unavailable'}
             </Text>
           </View>
-          <Switch
-            value={selectedPlayers.has(player.id)}
-            onValueChange={() => handlePlayerToggle(player.id)}
-          />
+          
+          {/* Selection Switch */}
+          <View style={styles.selectionControls}>
+            <Text variant="bodySmall" style={[
+              styles.selectionLabel,
+              { color: selectedPlayers.has(player.id) ? theme.colors.onPrimaryContainer : theme.colors.onSurface }
+            ]}>
+              {selectedPlayers.has(player.id) ? 'Selected' : 'Select'}
+            </Text>
+            <Switch
+              value={selectedPlayers.has(player.id)}
+              onValueChange={() => handlePlayerToggle(player.id)}
+              trackColor={{ false: theme.colors.outline, true: theme.colors.primary }}
+              thumbColor={selectedPlayers.has(player.id) ? theme.colors.onPrimary : theme.colors.outline}
+            />
+          </View>
+        </View>
+
+        {/* Availability Toggle */}
+        <View style={styles.availabilityContainer}>
+          <Text variant="bodySmall" style={styles.availabilityLabel}>Change Availability:</Text>
+          <Button
+            mode="outlined"
+            compact
+            onPress={() => handleAvailabilityToggle(player.id)}
+            style={[
+              styles.availabilityButton,
+              { 
+                backgroundColor: player.availability === 'available' ? theme.colors.primaryContainer : theme.colors.errorContainer,
+                borderColor: player.availability === 'available' ? theme.colors.primary : theme.colors.error
+              }
+            ]}
+            textColor={player.availability === 'available' ? theme.colors.onPrimaryContainer : theme.colors.onErrorContainer}
+          >
+            {player.availability === 'available' ? 'Mark Unavailable' : 'Mark Available'}
+          </Button>
         </View>
 
         {player.teams.length > 0 && (
@@ -241,9 +302,14 @@ const CreateMatchScreen: React.FC = () => {
           <View style={styles.selectionControls}>
             <Button onPress={handleSelectAll} mode="outlined">Select All</Button>
             <Button onPress={handleDeselectAll} mode="outlined">Deselect All</Button>
-            <Text variant="bodyMedium">
+            <Text variant="bodyMedium" style={styles.selectionCount}>
               Selected: {selectedPlayers.size} / {availablePlayers.length} available
             </Text>
+            {selectedPlayers.size > 0 && (
+              <Text variant="bodySmall" style={styles.selectedPlayersList}>
+                Selected: {Array.from(selectedPlayers).map(id => players.find(p => p.id === id)?.name).join(', ')}
+              </Text>
+            )}
           </View>
         </View>
 
@@ -427,6 +493,31 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: 8,
+  },
+  selectionLabel: {
+    marginRight: 8,
+    fontWeight: 'bold',
+  },
+  availabilityContainer: {
+    marginTop: 12,
+    alignItems: 'center',
+    gap: 8,
+  },
+  availabilityLabel: {
+    marginBottom: 4,
+    opacity: 0.7,
+  },
+  availabilityButton: {
+    minWidth: 120,
+  },
+  selectionCount: {
+    fontWeight: 'bold',
+    color: '#1976d2',
+  },
+  selectedPlayersList: {
+    marginTop: 4,
+    opacity: 0.8,
+    fontStyle: 'italic',
   },
   listContainer: {
     flex: 1,
