@@ -150,8 +150,9 @@ export const DatabaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const now = new Date().toISOString();
     
     const newTeam: Team = { ...team, id, createdAt: new Date(now), updatedAt: new Date(now) };
-    setTeams(prev => [...prev, newTeam]);
-    await AsyncStorage.setItem('teams', JSON.stringify(teams)); // Update AsyncStorage
+    const updatedTeams = [...teams, newTeam];
+    setTeams(updatedTeams);
+    await AsyncStorage.setItem('teams', JSON.stringify(updatedTeams)); // Update AsyncStorage with new state
     
     return id;
   };
@@ -171,19 +172,21 @@ export const DatabaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       return value;
     });
     
-    setTeams(prev => prev.map(team => 
+    const updatedTeams = teams.map(team => 
       team.id === id 
         ? { ...team, ...updates, updatedAt: new Date(now) }
         : team
-    ));
-    await AsyncStorage.setItem('teams', JSON.stringify(teams)); // Update AsyncStorage
+    );
+    setTeams(updatedTeams);
+    await AsyncStorage.setItem('teams', JSON.stringify(updatedTeams)); // Update AsyncStorage with new state
   };
 
   const deleteTeam = async (id: string): Promise<void> => {
     if (!db) throw new Error('Database not initialized');
     
-    setTeams(prev => prev.filter(team => team.id !== id));
-    await AsyncStorage.setItem('teams', JSON.stringify(teams)); // Update AsyncStorage
+    const updatedTeams = teams.filter(team => team.id !== id);
+    setTeams(updatedTeams);
+    await AsyncStorage.setItem('teams', JSON.stringify(updatedTeams)); // Update AsyncStorage with new state
   };
 
   const addMatch = async (match: Omit<Match, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> => {
@@ -193,8 +196,9 @@ export const DatabaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const now = new Date().toISOString();
     
     const newMatch: Match = { ...match, id, createdAt: new Date(now), updatedAt: new Date(now) };
-    setMatches(prev => [newMatch, ...prev]);
-    await AsyncStorage.setItem('matches', JSON.stringify(matches)); // Update AsyncStorage
+    const updatedMatches = [newMatch, ...matches];
+    setMatches(updatedMatches);
+    await AsyncStorage.setItem('matches', JSON.stringify(updatedMatches)); // Update AsyncStorage with new state
     
     return id;
   };
@@ -214,19 +218,21 @@ export const DatabaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       return value;
     });
     
-    setMatches(prev => prev.map(match => 
+    const updatedMatches = matches.map(match => 
       match.id === id 
         ? { ...match, ...updates, updatedAt: new Date(now) }
         : match
-    ));
-    await AsyncStorage.setItem('matches', JSON.stringify(matches)); // Update AsyncStorage
+    );
+    setMatches(updatedMatches);
+    await AsyncStorage.setItem('matches', JSON.stringify(updatedMatches)); // Update AsyncStorage with new state
   };
 
   const deleteMatch = async (id: string): Promise<void> => {
     if (!db) throw new Error('Database not initialized');
     
-    setMatches(prev => prev.filter(match => match.id !== id));
-    await AsyncStorage.setItem('matches', JSON.stringify(matches)); // Update AsyncStorage
+    const updatedMatches = matches.filter(match => match.id !== id);
+    setMatches(updatedMatches);
+    await AsyncStorage.setItem('matches', JSON.stringify(updatedMatches)); // Update AsyncStorage with new state
   };
 
   const addTemplate = async (template: Omit<MatchTemplate, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> => {
@@ -236,8 +242,9 @@ export const DatabaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const now = new Date().toISOString();
     
     const newTemplate: MatchTemplate = { ...template, id, createdAt: new Date(now), updatedAt: new Date(now) };
-    setTemplates(prev => [...prev, newTemplate]);
-    await AsyncStorage.setItem('templates', JSON.stringify(templates)); // Update AsyncStorage
+    const updatedTemplates = [...templates, newTemplate];
+    setTemplates(updatedTemplates);
+    await AsyncStorage.setItem('templates', JSON.stringify(updatedTemplates)); // Update AsyncStorage with new state
     
     return id;
   };
@@ -257,19 +264,21 @@ export const DatabaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       return value;
     });
     
-    setTemplates(prev => prev.map(template => 
+    const updatedTemplates = templates.map(template => 
       template.id === id 
         ? { ...template, ...updates, updatedAt: new Date(now) }
         : template
-    ));
-    await AsyncStorage.setItem('templates', JSON.stringify(templates)); // Update AsyncStorage
+    );
+    setTemplates(updatedTemplates);
+    await AsyncStorage.setItem('templates', JSON.stringify(updatedTemplates)); // Update AsyncStorage with new state
   };
 
   const deleteTemplate = async (id: string): Promise<void> => {
     if (!db) throw new Error('Database not initialized');
     
-    setTemplates(prev => prev.filter(template => template.id !== id));
-    await AsyncStorage.setItem('templates', JSON.stringify(templates)); // Update AsyncStorage
+    const updatedTemplates = templates.filter(template => template.id !== id);
+    setTemplates(updatedTemplates);
+    await AsyncStorage.setItem('templates', JSON.stringify(updatedTemplates)); // Update AsyncStorage with new state
   };
 
   const importPlayersFromCSV = async (csvData: string): Promise<{ success: number; errors: string[] }> => {
