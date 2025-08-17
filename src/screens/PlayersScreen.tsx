@@ -419,7 +419,7 @@ Jane Smith,6,9,7,8,7,9,Team B,Excellent setter,available`;
             <Text variant="bodySmall" style={styles.teamsLabel}>Teams:</Text>
             <View style={styles.chipsContainer}>
               {player.teams.map((team, index) => (
-                <Chip key={index} style={styles.teamChip} textStyle={styles.chipText}>
+                <Chip key={index} style={styles.teamChip} textStyle={styles.teamChipText}>
                   {team}
                 </Chip>
               ))}
@@ -544,6 +544,31 @@ Jane Smith,6,9,7,8,7,9,Team B,Excellent setter,available`;
               </View>
             ))}
 
+            <Text variant="bodyMedium" style={styles.skillSectionTitle}>Teams</Text>
+            <View style={styles.teamsContainer}>
+              {teams.map((team) => (
+                <Chip
+                  key={team.id}
+                  selected={formData.teams.includes(team.name)}
+                  onPress={() => {
+                    const newTeams = formData.teams.includes(team.name)
+                      ? formData.teams.filter(t => t !== team.name)
+                      : [...formData.teams, team.name];
+                    setFormData({ ...formData, teams: newTeams });
+                  }}
+                  style={styles.teamChip}
+                  textStyle={styles.teamChipText}
+                >
+                  {team.name}
+                </Chip>
+              ))}
+              {teams.length === 0 && (
+                <Text variant="bodySmall" style={styles.noTeamsText}>
+                  No teams available. Create teams in the Teams screen first.
+                </Text>
+              )}
+            </View>
+
             <TextInput
               label="Notes"
               value={formData.notes}
@@ -598,6 +623,31 @@ Jane Smith,6,9,7,8,7,9,Team B,Excellent setter,available`;
                 />
               </View>
             ))}
+
+            <Text variant="bodyMedium" style={styles.skillSectionTitle}>Teams</Text>
+            <View style={styles.teamsContainer}>
+              {teams.map((team) => (
+                <Chip
+                  key={team.id}
+                  selected={formData.teams.includes(team.name)}
+                  onPress={() => {
+                    const newTeams = formData.teams.includes(team.name)
+                      ? formData.teams.filter(t => t !== team.name)
+                      : [...formData.teams, team.name];
+                    setFormData({ ...formData, teams: newTeams });
+                  }}
+                  style={styles.teamChip}
+                  textStyle={styles.teamChipText}
+                >
+                  {team.name}
+                </Chip>
+              ))}
+              {teams.length === 0 && (
+                <Text variant="bodySmall" style={styles.noTeamsText}>
+                  No teams available. Create teams in the Teams screen first.
+                </Text>
+              )}
+            </View>
 
             <TextInput
               label="Notes"
@@ -773,8 +823,14 @@ const styles = StyleSheet.create({
   teamChip: {
     // Theme colors will be applied automatically
   },
-  chipText: {
+  teamChipText: {
     fontSize: 12,
+  },
+  noTeamsText: {
+    opacity: 0.7,
+    fontStyle: 'italic',
+    textAlign: 'center',
+    marginTop: 8,
   },
   notes: {
     fontStyle: 'italic',
