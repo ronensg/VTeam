@@ -200,108 +200,106 @@ const CreateMatchScreen: React.FC = () => {
         <Text variant="headlineMedium" style={styles.title}>Create Match</Text>
       </View>
 
-      {/* Filters */}
-      <View style={[styles.filtersContainer, { backgroundColor: theme.colors.surface, borderBottomColor: theme.colors.outline }]}>
-        <Searchbar
-          placeholder="Search players..."
-          onChangeText={setSearchQuery}
-          value={searchQuery}
-          style={styles.searchBar}
-          icon={() => <TextIcon name="search" size={20} color={theme.colors.onSurface} />}
-        />
-        
-        <View style={styles.filterRow}>
-          <SegmentedButtons
-            value={availabilityFilter}
-            onValueChange={(value) => setAvailabilityFilter(value as any)}
-            buttons={[
-              { value: 'all', label: 'All' },
-              { value: 'available', label: 'Available' },
-              { value: 'unavailable', label: 'Unavailable' },
-            ]}
-            style={styles.segmentedButtons}
+      {/* Main Scrollable Content */}
+      <ScrollView style={styles.mainScrollContainer} showsVerticalScrollIndicator={true}>
+        {/* Filters */}
+        <View style={[styles.filtersContainer, { backgroundColor: theme.colors.surface, borderBottomColor: theme.colors.outline }]}>
+          <Searchbar
+            placeholder="Search players..."
+            onChangeText={setSearchQuery}
+            value={searchQuery}
+            style={styles.searchBar}
+            icon={() => <TextIcon name="search" size={20} color={theme.colors.onSurface} />}
           />
           
-          <View style={styles.teamFilter}>
-            <Text variant="bodySmall">Team:</Text>
+          <View style={styles.filterRow}>
             <SegmentedButtons
-              value={teamFilter}
-              onValueChange={setTeamFilter}
+              value={availabilityFilter}
+              onValueChange={(value) => setAvailabilityFilter(value as any)}
               buttons={[
-                { value: '', label: 'All' },
-                ...teams.map(team => ({ value: team.name, label: team.name })),
+                { value: 'all', label: 'All' },
+                { value: 'available', label: 'Available' },
+                { value: 'unavailable', label: 'Unavailable' },
               ]}
-              style={styles.teamSegmentedButtons}
+              style={styles.segmentedButtons}
             />
+            
+            <View style={styles.teamFilter}>
+              <Text variant="bodySmall">Team:</Text>
+              <SegmentedButtons
+                value={teamFilter}
+                onValueChange={setTeamFilter}
+                buttons={[
+                  { value: '', label: 'All' },
+                  ...teams.map(team => ({ value: team.name, label: team.name })),
+                ]}
+                style={styles.teamSegmentedButtons}
+              />
+            </View>
+          </View>
+
+          <View style={styles.selectionControls}>
+            <Button onPress={handleSelectAll} mode="outlined">Select All</Button>
+            <Button onPress={handleDeselectAll} mode="outlined">Deselect All</Button>
+            <Text variant="bodyMedium">
+              Selected: {selectedPlayers.size} / {availablePlayers.length} available
+            </Text>
           </View>
         </View>
 
-        <View style={styles.selectionControls}>
-          <Button onPress={handleSelectAll} mode="outlined">Select All</Button>
-          <Button onPress={handleDeselectAll} mode="outlined">Deselect All</Button>
-          <Text variant="bodyMedium">
-            Selected: {selectedPlayers.size} / {availablePlayers.length} available
-          </Text>
-        </View>
-      </View>
+        {/* Configuration */}
+        <View style={[styles.configContainer, { backgroundColor: theme.colors.surface, borderBottomColor: theme.colors.outline }]}>
+          <View style={styles.configRow}>
+            <Text variant="bodyMedium">Number of Teams:</Text>
+            <SegmentedButtons
+              value={numberOfTeams.toString()}
+              onValueChange={(value) => setNumberOfTeams(parseInt(value))}
+              buttons={[
+                { value: '2', label: '2' },
+                { value: '3', label: '3' },
+                { value: '4', label: '4' },
+              ]}
+              style={styles.segmentedButtons}
+            />
+          </View>
 
-      {/* Configuration */}
-      <View style={[styles.configContainer, { backgroundColor: theme.colors.surface, borderBottomColor: theme.colors.outline }]}>
-        <View style={styles.configRow}>
-          <Text variant="bodyMedium">Number of Teams:</Text>
-          <SegmentedButtons
-            value={numberOfTeams.toString()}
-            onValueChange={(value) => setNumberOfTeams(parseInt(value))}
-            buttons={[
-              { value: '2', label: '2' },
-              { value: '3', label: '3' },
-              { value: '4', label: '4' },
-            ]}
-            style={styles.segmentedButtons}
-          />
-        </View>
+          <View style={styles.configRow}>
+            <Text variant="bodyMedium">Players per Team:</Text>
+            <TextInput
+              value={playersPerTeam?.toString() || ''}
+              onChangeText={(text) => setPlayersPerTeam(text ? parseInt(text) : undefined)}
+              placeholder="Auto"
+              keyboardType="numeric"
+              style={styles.playersInput}
+              dense
+            />
+          </View>
 
-        <View style={styles.configRow}>
-          <Text variant="bodyMedium">Players per Team:</Text>
-          <TextInput
-            value={playersPerTeam?.toString() || ''}
-            onChangeText={(text) => setPlayersPerTeam(text ? parseInt(text) : undefined)}
-            placeholder="Auto"
-            keyboardType="numeric"
-            style={styles.playersInput}
-            dense
-          />
-        </View>
-
-        <View style={styles.configActions}>
-          <Button
-            mode="outlined"
-            onPress={() => setShowWeightsDialog(true)}
-            icon={() => <TextIcon name="tune" size={20} color={theme.colors.primary} />}
-          >
-            Adjust Skill Weights
-          </Button>
-
-          {selectedPlayers.size > 0 && (
+          <View style={styles.configActions}>
             <Button
-              mode="contained"
-              onPress={handleGenerateTeams}
-              icon={() => <TextIcon name="play" size={20} color="white" />}
-              style={styles.generateButton}
+              mode="outlined"
+              onPress={() => setShowWeightsDialog(true)}
+              icon={() => <TextIcon name="tune" size={20} color={theme.colors.primary} />}
             >
-              Generate Teams ({selectedPlayers.size} selected)
+              Adjust Skill Weights
             </Button>
-          )}
-        </View>
-      </View>
 
-      {/* Generated Teams - Now displayed right after configuration */}
-      {/* The teams display logic has been moved to GeneratedTeamsScreen */}
-      
-      {/* Scrollable Content */}
-      <ScrollView style={styles.scrollContainer} showsVerticalScrollIndicator={true}>
+            {selectedPlayers.size > 0 && (
+              <Button
+                mode="contained"
+                onPress={handleGenerateTeams}
+                icon={() => <TextIcon name="play" size={20} color="white" />}
+                style={styles.generateButton}
+              >
+                Generate Teams ({selectedPlayers.size} selected)
+              </Button>
+            )}
+          </View>
+        </View>
+
         {/* Players List */}
         <View style={styles.listContainer}>
+          <Text variant="titleMedium" style={styles.playersSectionTitle}>Available Players</Text>
           <FlashList
             data={filteredPlayers}
             renderItem={renderPlayerCard}
@@ -392,9 +390,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   configContainer: {
-    padding: 16,
+    padding: 12,
     borderBottomWidth: 1,
-    gap: 16,
+    gap: 12,
   },
   configRow: {
     flexDirection: 'row',
@@ -408,9 +406,9 @@ const styles = StyleSheet.create({
     width: 80,
   },
   filtersContainer: {
-    padding: 16,
+    padding: 12,
     borderBottomWidth: 1,
-    gap: 12,
+    gap: 8,
   },
   searchBar: {
     marginBottom: 8,
@@ -431,8 +429,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   listContainer: {
-    flex: 1, // Use flex instead of fixed height to take remaining space
-    minHeight: 600, // Increased from 400 to ensure adequate height for players list
+    flex: 1,
   },
   listContent: {
     padding: 16,
@@ -496,11 +493,17 @@ const styles = StyleSheet.create({
   configActions: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 16,
+    marginTop: 12,
     gap: 8,
   },
-  scrollContainer: {
+  mainScrollContainer: {
     flex: 1,
+  },
+  playersSectionTitle: {
+    marginBottom: 16,
+    fontWeight: 'bold',
+    paddingHorizontal: 16,
+    paddingTop: 16,
   },
   weightsNote: {
     marginBottom: 16,
