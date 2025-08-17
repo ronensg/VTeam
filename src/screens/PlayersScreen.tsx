@@ -558,8 +558,9 @@ Jane Smith,6,9,7,8,7,9,Team B,Excellent setter,available`;
                   }}
                   style={styles.teamChip}
                   textStyle={styles.teamChipText}
+                  icon={formData.teams.includes(team.name) ? () => <TextIcon name="check" size={16} color="white" /> : undefined}
                 >
-                  {team.name}
+                  {formData.teams.includes(team.name) ? `✓ ${team.name}` : team.name}
                 </Chip>
               ))}
               {teams.length === 0 && (
@@ -638,8 +639,9 @@ Jane Smith,6,9,7,8,7,9,Team B,Excellent setter,available`;
                   }}
                   style={styles.teamChip}
                   textStyle={styles.teamChipText}
+                  icon={formData.teams.includes(team.name) ? () => <TextIcon name="check" size={16} color="white" /> : undefined}
                 >
-                  {team.name}
+                  {formData.teams.includes(team.name) ? `✓ ${team.name}` : team.name}
                 </Chip>
               ))}
               {teams.length === 0 && (
