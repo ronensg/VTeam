@@ -108,7 +108,11 @@ const CreateMatchScreen: React.FC = () => {
     });
   }, [localPlayers, searchQuery, teamFilter, availabilityFilter]);
 
+  // Available players for selection (only those marked as available)
   const availablePlayers = filteredPlayers.filter(p => p.availability === 'available');
+  
+  // All players that should be displayed (including unavailable ones)
+  const displayPlayers = filteredPlayers;
 
   const handleSelectAll = () => {
     const allPlayerIds = new Set(availablePlayers.map(p => p.id));
@@ -124,6 +128,18 @@ const CreateMatchScreen: React.FC = () => {
     console.log('Toggling player selection:', playerId);
     console.log('Current selected players:', Array.from(selectedPlayers));
     console.log('Player exists in current selection:', selectedPlayers.has(playerId));
+    
+    // Check if player is available for selection
+    const player = localPlayers.find(p => p.id === playerId);
+    if (!player) {
+      console.log('❌ Player not found:', playerId);
+      return;
+    }
+    
+    if (player.availability === 'unavailable') {
+      console.log('❌ Player is unavailable, cannot select:', playerId);
+      return;
+    }
     
     const newSelected = new Set(selectedPlayers);
     if (newSelected.has(playerId)) {
@@ -194,29 +210,30 @@ const CreateMatchScreen: React.FC = () => {
 
   const renderPlayerCard = ({ item: player }: { item: Player }) => {
     const isSelected = selectedPlayers.has(player.id);
-    console.log(`Rendering player ${player.name} (${player.id}) - Selected: ${isSelected}`);
+    const isAvailable = player.availability === 'available';
+    console.log(`Rendering player ${player.name} (${player.id}) - Selected: ${isSelected}, Available: ${isAvailable}`);
     
     return (
       <Card 
         style={[
           styles.playerCard, 
           { 
-            opacity: player.availability === 'unavailable' ? 0.6 : 1,
+            opacity: isAvailable ? 1 : 0.6,
             borderColor: isSelected ? '#4CAF50' : 'transparent',
             borderWidth: isSelected ? 3 : 0,
             backgroundColor: isSelected ? '#E8F5E8' : theme.colors.surface,
           }
         ]}
-        onPress={() => handlePlayerToggle(player.id)}
+        onPress={() => isAvailable ? handlePlayerToggle(player.id) : null}
       >
       <Card.Content>
-        {/* Player Name */}
-        <Text variant="titleMedium" style={[
-          styles.playerName,
-          { color: selectedPlayers.has(player.id) ? '#2E7D32' : theme.colors.onSurface }
-        ]}>
-          {player.name}
-        </Text>
+                 {/* Player Name */}
+         <Text variant="titleMedium" style={[
+           styles.playerName,
+           { color: isSelected ? '#2E7D32' : theme.colors.onSurface }
+         ]}>
+           {player.name}
+         </Text>
 
         {/* Availability Toggle Button */}
         <View style={styles.availabilityToggleContainer}>
@@ -255,9 +272,9 @@ const CreateMatchScreen: React.FC = () => {
          <View style={styles.selectionStatusContainer}>
            <Text variant="bodySmall" style={[
              styles.selectionStatusText,
-             { color: isSelected ? '#2E7D32' : theme.colors.onSurface }
+             { color: isSelected ? '#2E7D32' : !isAvailable ? '#9E9E9E' : theme.colors.onSurface }
            ]}>
-             {isSelected ? '✓ Selected for Match' : 'Tap to Select'}
+             {!isAvailable ? '❌ Unavailable' : isSelected ? '✓ Selected for Match' : 'Tap to Select'}
            </Text>
          </View>
        </Card.Content>
@@ -374,18 +391,19 @@ const CreateMatchScreen: React.FC = () => {
           </View>
         </View>
 
-        {/* Players List */}
-        <View style={styles.listContainer}>
-          <Text variant="titleMedium" style={styles.playersSectionTitle}>Available Players</Text>
-          <FlashList
-            data={filteredPlayers}
-            renderItem={renderPlayerCard}
-            estimatedItemSize={150}
-            keyExtractor={(item) => item.id}
-            numColumns={3} // Display 3 players per row
-            contentContainerStyle={styles.listContent}
-          />
-        </View>
+                 {/* Players List */}
+         <View style={styles.listContainer}>
+           <Text variant="titleMedium" style={styles.playersSectionTitle}>All Players</Text>
+           <FlashList
+             data={displayPlayers}
+             renderItem={renderPlayerCard}
+             estimatedItemSize={150}
+             keyExtractor={(item) => item.id}
+             numColumns={3} // Display 3 players per row
+             contentContainerStyle={styles.listContent}
+             extraData={selectedPlayers.size} // Force re-render when selection changes
+           />
+         </View>
       </ScrollView>
 
       {/* Skill Weights Dialog */}
