@@ -104,8 +104,9 @@ export const DatabaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const now = new Date().toISOString();
     
     const newPlayer: Player = { ...player, id, createdAt: new Date(now), updatedAt: new Date(now) };
-    setPlayers(prev => [...prev, newPlayer]);
-    await AsyncStorage.setItem('players', JSON.stringify(players)); // Update AsyncStorage
+    const updatedPlayers = [...players, newPlayer];
+    setPlayers(updatedPlayers);
+    await AsyncStorage.setItem('players', JSON.stringify(updatedPlayers)); // Update AsyncStorage with new state
     
     return id;
   };
@@ -125,19 +126,21 @@ export const DatabaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       return value;
     });
     
-    setPlayers(prev => prev.map(player => 
+    const updatedPlayers = players.map(player => 
       player.id === id 
         ? { ...player, ...updates, updatedAt: new Date(now) }
         : player
-    ));
-    await AsyncStorage.setItem('players', JSON.stringify(players)); // Update AsyncStorage
+    );
+    setPlayers(updatedPlayers);
+    await AsyncStorage.setItem('players', JSON.stringify(updatedPlayers)); // Update AsyncStorage with new state
   };
 
   const deletePlayer = async (id: string): Promise<void> => {
     if (!db) throw new Error('Database not initialized');
     
-    setPlayers(prev => prev.filter(player => player.id !== id));
-    await AsyncStorage.setItem('players', JSON.stringify(players)); // Update AsyncStorage
+    const updatedPlayers = players.filter(player => player.id !== id);
+    setPlayers(updatedPlayers);
+    await AsyncStorage.setItem('players', JSON.stringify(updatedPlayers)); // Update AsyncStorage with new state
   };
 
   const addTeam = async (team: Omit<Team, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> => {
