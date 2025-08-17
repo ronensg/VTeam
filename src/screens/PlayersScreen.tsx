@@ -627,7 +627,20 @@ Jane Smith,6,9,7,8,7,9,Team B,Excellent setter,available`;
       {/* Import Dialog */}
       <Portal>
         <Dialog visible={showImportDialog} onDismiss={() => setShowImportDialog(false)}>
-          <Dialog.Title>Import Players from CSV</Dialog.Title>
+          <Dialog.Title>
+            Import Players from CSV
+            <View style={styles.downloadButtonContainer}>
+              <Button 
+                mode="outlined" 
+                onPress={downloadCSVTemplate}
+                icon={() => <TextIcon name="download" size={16} color={theme.colors.primary} />}
+                style={styles.downloadTemplateButton}
+                compact
+              >
+                Template
+              </Button>
+            </View>
+          </Dialog.Title>
           <Dialog.Content>
             <Text variant="bodyMedium" style={{ marginBottom: 16 }}>
               Select a CSV file with player data. The file should have columns for:
@@ -639,15 +652,6 @@ Jane Smith,6,9,7,8,7,9,Team B,Excellent setter,available`;
                 💡 Tip: On mobile, tap the Import button to open file selection
               </Text>
             )}
-            
-            <Button 
-              mode="outlined" 
-              onPress={downloadCSVTemplate}
-              icon="download"
-              style={{ marginBottom: 16 }}
-            >
-              Download CSV Template
-            </Button>
           </Dialog.Content>
           <Dialog.Actions>
             <Button onPress={() => setShowImportDialog(false)}>Cancel</Button>
@@ -797,6 +801,15 @@ const styles = StyleSheet.create({
   },
   availabilityButtons: {
     marginTop: 8,
+  },
+  downloadButtonContainer: {
+    position: 'absolute',
+    right: 0,
+    top: 0,
+  },
+  downloadTemplateButton: {
+    minWidth: 80,
+    height: 32,
   },
 });
 
