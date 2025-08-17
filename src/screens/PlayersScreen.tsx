@@ -25,6 +25,40 @@ import * as FileSystem from 'expo-file-system';
 import { useDatabase } from '../services/DatabaseContext';
 import { Player, SkillWeights } from '../types';
 
+// Simple text-based icons that work without fonts
+const TextIcon: React.FC<{ name: string; size?: number; color?: string }> = ({ name, size = 20, color = 'black' }) => {
+  const iconMap: { [key: string]: string } = {
+    'more-vert': '⋮',
+    'edit': '✏️',
+    'delete': '🗑️',
+    'upload': '📤',
+    'download': '📥',
+    'add': '➕',
+    'close': '❌',
+    'check': '✅',
+    'arrow-back': '⬅️',
+    'arrow-forward': '➡️',
+    'menu': '☰',
+    'search': '🔍',
+    'filter-list': '🔧',
+    'sort': '📊',
+    'refresh': '🔄',
+    'settings': '⚙️',
+    'help': '❓',
+    'info': 'ℹ️',
+    'warning': '⚠️',
+    'error': '❌',
+    'success': '✅'
+  };
+  
+  const icon = iconMap[name] || '?';
+  return (
+    <Text style={{ fontSize: size, color, textAlign: 'center', lineHeight: size }}>
+      {icon}
+    </Text>
+  );
+};
+
 const PlayersScreen: React.FC = () => {
   const theme = useTheme();
   const { players, teams, addPlayer, updatePlayer, deletePlayer, importPlayersFromCSV } = useDatabase();
@@ -310,7 +344,7 @@ Jane Smith,6,9,7,8,7,9,Team B,Excellent setter,available`;
               onDismiss={() => setMenuVisible(null)}
               anchor={
                 <IconButton
-                  icon="dots-vertical"
+                  icon={() => <TextIcon name="more-vert" size={24} color={theme.colors.onSurface} />}
                   onPress={() => setMenuVisible(player.id)}
                 />
               }
@@ -321,7 +355,7 @@ Jane Smith,6,9,7,8,7,9,Team B,Excellent setter,available`;
                   openEditDialog(player);
                 }}
                 title="Edit"
-                leadingIcon="pencil"
+                leadingIcon={() => <TextIcon name="edit" size={20} color={theme.colors.onSurface} />}
               />
               <Menu.Item
                 onPress={() => {
@@ -329,7 +363,7 @@ Jane Smith,6,9,7,8,7,9,Team B,Excellent setter,available`;
                   handleDeletePlayer(player.id);
                 }}
                 title="Delete"
-                leadingIcon="delete"
+                leadingIcon={() => <TextIcon name="delete" size={20} color={theme.colors.onSurface} />}
               />
             </Menu>
           </View>
@@ -411,14 +445,14 @@ Jane Smith,6,9,7,8,7,9,Team B,Excellent setter,available`;
           <Button
             mode="outlined"
             onPress={() => setShowImportDialog(true)}
-            icon="upload"
+                            icon={() => <TextIcon name="upload" size={20} color={theme.colors.primary} />}
           >
             Import CSV
           </Button>
           <Button
             mode="outlined"
             onPress={downloadCSVTemplate}
-            icon="download"
+                            icon={() => <TextIcon name="download" size={20} color={theme.colors.primary} />}
           >
             Template
           </Button>
@@ -474,7 +508,7 @@ Jane Smith,6,9,7,8,7,9,Team B,Excellent setter,available`;
 
       {/* Add Player FAB */}
       <FAB
-        icon="plus"
+        icon={() => <TextIcon name="add" size={24} color="white" />}
         style={styles.fab}
         onPress={() => setShowAddDialog(true)}
       />
