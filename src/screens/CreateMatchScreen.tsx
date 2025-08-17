@@ -66,7 +66,7 @@ const CreateMatchScreen: React.FC = () => {
   
   const [searchQuery, setSearchQuery] = useState('');
   const [teamFilter, setTeamFilter] = useState<string>('');
-  const [availabilityFilter, setAvailabilityFilter] = useState<'all' | 'available' | 'unavailable'>('available');
+  const [availabilityFilter, setAvailabilityFilter] = useState<'all' | 'available' | 'unavailable'>('all');
   const [numberOfTeams, setNumberOfTeams] = useState(2);
   const [playersPerTeam, setPlayersPerTeam] = useState<number | undefined>(undefined);
   const [skillWeights, setSkillWeights] = useState<SkillWeights>({
