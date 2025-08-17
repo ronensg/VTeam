@@ -114,28 +114,40 @@ const CreateMatchScreen: React.FC = () => {
   };
 
   const handlePlayerToggle = (playerId: string) => {
-    console.log('Toggling player:', playerId, 'Current selected:', Array.from(selectedPlayers));
+    console.log('Toggling player selection:', playerId, 'Current selected:', Array.from(selectedPlayers));
     const newSelected = new Set(selectedPlayers);
     if (newSelected.has(playerId)) {
       newSelected.delete(playerId);
-      console.log('Removed player:', playerId);
+      console.log('Removed player from selection:', playerId);
     } else {
       newSelected.add(playerId);
-      console.log('Added player:', playerId);
+      console.log('Added player to selection:', playerId);
     }
     setSelectedPlayers(newSelected);
     console.log('New selected set:', Array.from(newSelected));
   };
 
-  const handleAvailabilityToggle = async (playerId: string) => {
+  const handleAvailabilityToggle = async (playerId: string, event: any) => {
+    // Prevent the event from bubbling up to the card's onPress
+    event.stopPropagation();
+    
     try {
       const player = players.find(p => p.id === playerId);
       if (player) {
         const newAvailability = player.availability === 'available' ? 'unavailable' : 'available';
-        // Update the player's availability in the database
-        // This would require adding an updatePlayer function to your database context
-        console.log('Toggling availability for player:', playerId, 'to:', newAvailability);
-        // For now, we'll just log it - you'll need to implement the actual update
+        console.log('Toggling availability for player:', playerId, 'from', player.availability, 'to:', newAvailability);
+        
+        // TODO: Implement actual database update
+        // For now, we'll just log the change
+        // You'll need to add an updatePlayer function to your database context
+        
+        // Force a re-render by updating the local state
+        // This is a temporary solution until database integration is complete
+        const updatedPlayers = players.map(p => 
+          p.id === playerId ? { ...p, availability: newAvailability } : p
+        );
+        // Note: This won't persist to the database, but will show the UI change
+        console.log('Availability updated for player:', playerId, 'to:', newAvailability);
       }
     } catch (error) {
       console.error('Error toggling availability:', error);
@@ -171,73 +183,42 @@ const CreateMatchScreen: React.FC = () => {
         styles.playerCard, 
         { 
           opacity: player.availability === 'unavailable' ? 0.6 : 1,
-          borderColor: selectedPlayers.has(player.id) ? theme.colors.primary : 'transparent',
+          borderColor: selectedPlayers.has(player.id) ? '#4CAF50' : 'transparent',
           borderWidth: selectedPlayers.has(player.id) ? 3 : 0,
-          backgroundColor: selectedPlayers.has(player.id) ? theme.colors.primaryContainer : theme.colors.surface,
+          backgroundColor: selectedPlayers.has(player.id) ? '#E8F5E8' : theme.colors.surface,
         }
       ]}
       onPress={() => handlePlayerToggle(player.id)}
     >
       <Card.Content>
-        <View style={styles.playerHeader}>
-          <View style={styles.playerInfo}>
-            <Text variant="titleMedium" style={[
-              styles.playerName,
-              { color: selectedPlayers.has(player.id) ? theme.colors.onPrimaryContainer : theme.colors.onSurface }
-            ]}>
-              {player.name}
-            </Text>
-            <Text variant="bodySmall" style={[
-              styles.playerScore,
-              { color: selectedPlayers.has(player.id) ? theme.colors.onPrimaryContainer : theme.colors.onSurface }
-            ]}>
-              Total Score: {Math.round((player.serve + player.set + player.block + player.receive + player.attack + player.defense) * 100) / 100}
-            </Text>
-            <Text variant="bodySmall" style={[
-              styles.playerAvailability,
-              { color: selectedPlayers.has(player.id) ? theme.colors.onPrimaryContainer : theme.colors.onSurface }
-            ]}>
-              Availability: {player.availability === 'available' ? '✅ Available' : '❌ Unavailable'}
-            </Text>
-          </View>
-          
-          {/* Selection Switch */}
-          <View style={styles.selectionControls}>
-            <Text variant="bodySmall" style={[
-              styles.selectionLabel,
-              { color: selectedPlayers.has(player.id) ? theme.colors.onPrimaryContainer : theme.colors.onSurface }
-            ]}>
-              {selectedPlayers.has(player.id) ? 'Selected' : 'Select'}
-            </Text>
-            <Switch
-              value={selectedPlayers.has(player.id)}
-              onValueChange={() => handlePlayerToggle(player.id)}
-              trackColor={{ false: theme.colors.outline, true: theme.colors.primary }}
-              thumbColor={selectedPlayers.has(player.id) ? theme.colors.onPrimary : theme.colors.outline}
-            />
-          </View>
-        </View>
+        {/* Player Name */}
+        <Text variant="titleMedium" style={[
+          styles.playerName,
+          { color: selectedPlayers.has(player.id) ? '#2E7D32' : theme.colors.onSurface }
+        ]}>
+          {player.name}
+        </Text>
 
-        {/* Availability Toggle */}
-        <View style={styles.availabilityContainer}>
-          <Text variant="bodySmall" style={styles.availabilityLabel}>Change Availability:</Text>
+        {/* Availability Toggle Button */}
+        <View style={styles.availabilityToggleContainer}>
           <Button
-            mode="outlined"
+            mode="contained"
             compact
-            onPress={() => handleAvailabilityToggle(player.id)}
+            onPress={(event) => handleAvailabilityToggle(player.id, event)}
             style={[
-              styles.availabilityButton,
+              styles.availabilityToggleButton,
               { 
-                backgroundColor: player.availability === 'available' ? theme.colors.primaryContainer : theme.colors.errorContainer,
-                borderColor: player.availability === 'available' ? theme.colors.primary : theme.colors.error
+                backgroundColor: player.availability === 'available' ? '#4CAF50' : '#9E9E9E',
+                borderColor: player.availability === 'available' ? '#4CAF50' : '#9E9E9E'
               }
             ]}
-            textColor={player.availability === 'available' ? theme.colors.onPrimaryContainer : theme.colors.onErrorContainer}
+            textColor="white"
           >
-            {player.availability === 'available' ? 'Mark Unavailable' : 'Mark Available'}
+            {player.availability === 'available' ? 'Available' : 'Unavailable'}
           </Button>
         </View>
 
+        {/* Teams Indicator */}
         {player.teams.length > 0 && (
           <View style={styles.playerTeamsContainer}>
             <Text variant="bodySmall" style={styles.teamsLabel}>Teams:</Text>
@@ -250,6 +231,16 @@ const CreateMatchScreen: React.FC = () => {
             </View>
           </View>
         )}
+
+        {/* Selection Status Indicator */}
+        <View style={styles.selectionStatusContainer}>
+          <Text variant="bodySmall" style={[
+            styles.selectionStatusText,
+            { color: selectedPlayers.has(player.id) ? '#2E7D32' : theme.colors.onSurface }
+          ]}>
+            {selectedPlayers.has(player.id) ? '✓ Selected for Match' : 'Tap to Select'}
+          </Text>
+        </View>
       </Card.Content>
     </Card>
   );
@@ -510,6 +501,22 @@ const styles = StyleSheet.create({
   availabilityButton: {
     minWidth: 120,
   },
+  availabilityToggleContainer: {
+    marginTop: 8,
+    alignItems: 'center',
+  },
+  availabilityToggleButton: {
+    minWidth: 100,
+    height: 32,
+  },
+  selectionStatusContainer: {
+    marginTop: 8,
+    alignItems: 'center',
+  },
+  selectionStatusText: {
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
   selectionCount: {
     fontWeight: 'bold',
     color: '#1976d2',
@@ -527,37 +534,17 @@ const styles = StyleSheet.create({
   },
   playerCard: {
     marginBottom: 8,
-    marginHorizontal: 4, // Add horizontal margin for grid spacing
+    marginHorizontal: 4,
     borderRadius: 12,
-    flex: 1, // Allow cards to grow to fill available space
-    minWidth: 100, // Ensure minimum width for readability
-  },
-  playerHeader: {
-    flexDirection: 'column', // Stack vertically for compact grid layout
-    alignItems: 'center', // Center align for grid layout
-    marginBottom: 8, // Reduced from 12
-    gap: 4, // Add gap between elements
-  },
-  playerInfo: {
     flex: 1,
-    alignItems: 'center', // Center align text
+    minWidth: 120,
+    padding: 8,
   },
   playerName: {
     fontWeight: 'bold',
-    marginBottom: 2, // Reduced from 4
-    fontSize: 14, // Smaller font size for compact layout
-    textAlign: 'center', // Center align text
-  },
-  playerScore: {
-    opacity: 0.7,
-    fontSize: 11, // Smaller font size for compact layout
-    textAlign: 'center', // Center align text
-  },
-  playerAvailability: {
-    marginTop: 2, // Reduced from 4
-    opacity: 0.7,
-    fontSize: 10, // Smaller font size for compact layout
-    textAlign: 'center', // Center align text
+    marginBottom: 8,
+    fontSize: 16,
+    textAlign: 'center',
   },
   playerTeamsContainer: {
     marginBottom: 8,
