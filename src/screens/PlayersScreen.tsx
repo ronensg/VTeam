@@ -556,9 +556,14 @@ Jane Smith,6,9,7,8,7,9,Team B,Excellent setter,available`;
                       : [...formData.teams, team.name];
                     setFormData({ ...formData, teams: newTeams });
                   }}
-                  style={styles.teamChip}
-                  textStyle={styles.teamChipText}
-                  icon={formData.teams.includes(team.name) ? () => <TextIcon name="check" size={16} color="white" /> : undefined}
+                  style={[
+                    styles.teamChip,
+                    formData.teams.includes(team.name) && styles.selectedTeamChip
+                  ]}
+                  textStyle={[
+                    styles.teamChipText,
+                    formData.teams.includes(team.name) && styles.selectedTeamChipText
+                  ]}
                 >
                   {formData.teams.includes(team.name) ? `✓ ${team.name}` : team.name}
                 </Chip>
@@ -637,9 +642,14 @@ Jane Smith,6,9,7,8,7,9,Team B,Excellent setter,available`;
                       : [...formData.teams, team.name];
                     setFormData({ ...formData, teams: newTeams });
                   }}
-                  style={styles.teamChip}
-                  textStyle={styles.teamChipText}
-                  icon={formData.teams.includes(team.name) ? () => <TextIcon name="check" size={16} color="white" /> : undefined}
+                  style={[
+                    styles.teamChip,
+                    formData.teams.includes(team.name) && styles.selectedTeamChip
+                  ]}
+                  textStyle={[
+                    styles.teamChipText,
+                    formData.teams.includes(team.name) && styles.selectedTeamChipText
+                  ]}
                 >
                   {formData.teams.includes(team.name) ? `✓ ${team.name}` : team.name}
                 </Chip>
@@ -825,8 +835,15 @@ const styles = StyleSheet.create({
   teamChip: {
     // Theme colors will be applied automatically
   },
+  selectedTeamChip: {
+    backgroundColor: '#4CAF50',
+  },
   teamChipText: {
     fontSize: 12,
+  },
+  selectedTeamChipText: {
+    color: 'white',
+    fontWeight: 'bold',
   },
   noTeamsText: {
     opacity: 0.7,
