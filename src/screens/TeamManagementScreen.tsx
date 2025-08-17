@@ -238,7 +238,7 @@ const TeamManagementScreen: React.FC = () => {
 
       {/* Add Team FAB */}
       <FAB
-        icon="plus"
+        icon={() => <TextIcon name="add" size={24} color="white" />}
         style={styles.fab}
         onPress={() => setShowAddDialog(true)}
       />
@@ -321,8 +321,8 @@ const TeamManagementScreen: React.FC = () => {
             />
           </Dialog.Content>
           <Dialog.Actions>
-            <Button onPress={() => setShowEditDialog(false)}>Cancel</Button>
-            <Button onPress={handleEditTeam}>Save Changes</Button>
+            <Button onPress={() => setShowEditDialog(false)} icon={() => <TextIcon name="close" size={20} color={theme.colors.onSurface} />}>Cancel</Button>
+            <Button onPress={handleEditTeam} icon={() => <TextIcon name="check" size={20} color={theme.colors.primary} />}>Save Changes</Button>
           </Dialog.Actions>
         </Dialog>
       </Portal>
