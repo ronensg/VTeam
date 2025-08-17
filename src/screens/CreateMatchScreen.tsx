@@ -62,7 +62,7 @@ const TextIcon: React.FC<{ name: string; size?: number; color?: string }> = ({ n
 const CreateMatchScreen: React.FC = () => {
   const theme = useTheme();
   const navigation = useNavigation();
-  const { players, teams, addMatch } = useDatabase();
+  const { players, teams, addMatch, updatePlayer } = useDatabase();
   
   const [searchQuery, setSearchQuery] = useState('');
   const [teamFilter, setTeamFilter] = useState<string>('');
@@ -169,14 +169,14 @@ const CreateMatchScreen: React.FC = () => {
         const newAvailability = player.availability === 'available' ? 'unavailable' : 'available';
         console.log('Toggling availability for player:', playerId, 'from', player.availability, 'to:', newAvailability);
         
+        // Update the database first (this will update the global state)
+        await updatePlayer(playerId, { availability: newAvailability as 'available' | 'unavailable' });
+        
         // Update the local state to show the change immediately
         const updatedPlayers = localPlayers.map(p => 
           p.id === playerId ? { ...p, availability: newAvailability as 'available' | 'unavailable' } : p
         );
         setLocalPlayers(updatedPlayers);
-        
-        // TODO: Implement actual database update
-        // You'll need to add an updatePlayer function to your database context
         
         console.log('Availability updated for player:', playerId, 'to:', newAvailability);
       }
