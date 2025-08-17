@@ -36,49 +36,50 @@ export default function App() {
     if (typeof window !== 'undefined') {
       console.log('Setting up font loading for web...');
       
-      // Override the font loading paths to use correct /VTeam/ prefix
-      const originalFetch = window.fetch;
-      window.fetch = function(input, init) {
-        let url = input as string;
-        if (typeof url === 'string' && url.includes('/assets/') && !url.includes('/VTeam/')) {
-          url = url.replace('/assets/', '/VTeam/assets/');
-          console.log('Redirecting font request from:', input, 'to:', url);
+      // Simple approach: Load MaterialIcons font directly with correct path
+      const loadMaterialIconsFont = async () => {
+        try {
+          // Create a FontFace with the correct path
+          const fontFace = new FontFace(
+            'MaterialIcons',
+            'url(https://fonts.googleapis.com/icon?family=Material+Icons)'
+          );
+          
+          // Load the font
+          const loadedFont = await fontFace.load();
+          (document.fonts as any).add(loadedFont);
+          console.log('MaterialIcons font loaded successfully from Google Fonts');
+        } catch (error) {
+          console.log('Failed to load MaterialIcons font:', error);
         }
-        return originalFetch.call(this, url, init);
       };
 
-      // Also override the global asset loading function that Expo uses
-      if ((window as any).__EXPO_ASSET_MANIFEST__) {
-        console.log('Expo asset manifest found, patching asset paths...');
-        const originalManifest = (window as any).__EXPO_ASSET_MANIFEST__;
-        (window as any).__EXPO_ASSET_MANIFEST__ = new Proxy(originalManifest, {
-          get(target, prop) {
-            const value = target[prop];
-            if (typeof value === 'string' && value.includes('/assets/') && !value.includes('/VTeam/')) {
-              const patchedValue = value.replace('/assets/', '/VTeam/assets/');
-              console.log('Patching asset manifest path from:', value, 'to:', patchedValue);
-              return patchedValue;
-            }
-            return value;
-          }
-        });
-      }
+      // Also try to load local font files as fallback
+      const loadLocalFonts = async () => {
+        try {
+          const localFontFace = new FontFace(
+            'MaterialIcons',
+            'url(/VTeam/assets/node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/MaterialIcons.4e85bc9ebe07e0340c9c4fc2f6c38908.ttf)'
+          );
+          
+          const loadedLocalFont = await localFontFace.load();
+          (document.fonts as any).add(loadedLocalFont);
+          console.log('Local MaterialIcons font loaded successfully');
+        } catch (error) {
+          console.log('Local font loading failed:', error);
+        }
+      };
 
-      // Ensure MaterialIcons font is loaded on web
+      // Load both fonts
+      loadMaterialIconsFont();
+      loadLocalFonts();
+      
+      // Add Google Fonts link as additional fallback
       const link = document.createElement('link');
       link.href = 'https://fonts.googleapis.com/icon?family=Material+Icons';
       link.rel = 'stylesheet';
       document.head.appendChild(link);
       console.log('Google Fonts link added');
-      
-      // Try to load the local font files with correct paths
-      const fontFace = new FontFace('MaterialIcons', `url(/VTeam/assets/node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/MaterialIcons.4e85bc9ebe07e0340c9c4fc2f6c38908.ttf)`);
-      fontFace.load().then(() => {
-        (document.fonts as any).add(fontFace);
-        console.log('Local MaterialIcons font loaded successfully');
-      }).catch((error) => {
-        console.log('Local font loading failed, using Google Fonts:', error);
-      });
       
       console.log('Font loading setup complete');
     }
