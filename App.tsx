@@ -36,52 +36,88 @@ export default function App() {
     if (typeof window !== 'undefined') {
       console.log('Setting up font loading for web...');
       
-      // Simple approach: Load MaterialIcons font directly with correct path
-      const loadMaterialIconsFont = async () => {
-        try {
-          // Create a FontFace with the correct Google Fonts URL for Material Icons
-          const fontFace = new FontFace(
-            'MaterialIcons',
-            'url(https://fonts.gstatic.com/s/materialicons/v140/flUhRq6tzZclQEJ-Vdg-IuiaDsNc.woff2)'
-          );
-          
-          // Load the font
-          const loadedFont = await fontFace.load();
-          (document.fonts as any).add(loadedFont);
-          console.log('MaterialIcons font loaded successfully from Google Fonts');
-        } catch (error) {
-          console.log('Failed to load MaterialIcons font:', error);
-        }
-      };
-
-      // Also try to load local font files as fallback
-      const loadLocalFonts = async () => {
-        try {
-          const localFontFace = new FontFace(
-            'MaterialIcons',
-            'url(/VTeam/assets/node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/MaterialIcons.4e85bc9ebe07e0340c9c4fc2f6c38908.ttf)'
-          );
-          
-          const loadedLocalFont = await localFontFace.load();
-          (document.fonts as any).add(loadedLocalFont);
-          console.log('Local MaterialIcons font loaded successfully');
-        } catch (error) {
-          console.log('Local font loading failed:', error);
-        }
-      };
-
-      // Load both fonts
-      loadMaterialIconsFont();
-      loadLocalFonts();
+      // AGGRESSIVE APPROACH: Override font loading at the module level
       
-      // Add Google Fonts link as additional fallback
+      // 1. Override the fetch function to redirect ALL font requests
+      const originalFetch = window.fetch;
+      window.fetch = function(input, init) {
+        let url = input as string;
+        if (typeof url === 'string') {
+          // Redirect any font requests to Google Fonts
+          if (url.includes('MaterialIcons') || url.includes('materialicons')) {
+            url = 'https://fonts.gstatic.com/s/materialicons/v140/flUhRq6tzZclQEJ-Vdg-IuiaDsNc.woff2';
+            console.log('Redirecting MaterialIcons font request to Google Fonts:', url);
+          }
+          // Also redirect any other font requests that might be failing
+          else if (url.includes('/assets/') && url.includes('.ttf')) {
+            url = 'https://fonts.gstatic.com/s/materialicons/v140/flUhRq6tzZclQEJ-Vdg-IuiaDsNc.woff2';
+            console.log('Redirecting TTF font request to Google Fonts:', url);
+          }
+        }
+        return originalFetch.call(this, url, init);
+      };
+
+      // 2. Override XMLHttpRequest for older font loading methods
+      const originalXHROpen = XMLHttpRequest.prototype.open;
+      XMLHttpRequest.prototype.open = function(method: string, url: string | URL, ...args: any[]) {
+        let modifiedUrl: string | URL = url;
+        if (typeof url === 'string') {
+          if (url.includes('MaterialIcons') || url.includes('materialicons') || 
+              (url.includes('/assets/') && url.includes('.ttf'))) {
+            modifiedUrl = 'https://fonts.gstatic.com/s/materialicons/v140/flUhRq6tzZclQEJ-Vdg-IuiaDsNc.woff2';
+            console.log('Redirecting XHR font request to Google Fonts:', modifiedUrl);
+          }
+        }
+        return originalXHROpen.call(this, method, modifiedUrl, ...args);
+      };
+
+      // 3. Override any global font loading functions
+      if ((window as any).__EXPO_FONT_LOADER__) {
+        console.log('Expo font loader found, patching...');
+        const originalLoader = (window as any).__EXPO_FONT_LOADER__;
+        (window as any).__EXPO_FONT_LOADER__ = new Proxy(originalLoader, {
+          get(target, prop) {
+            const value = target[prop];
+            if (typeof value === 'function') {
+              return function(this: any, ...args: any[]) {
+                // Replace any font URLs with Google Fonts
+                const patchedArgs = args.map(arg => {
+                  if (typeof arg === 'string' && (arg.includes('MaterialIcons') || arg.includes('.ttf'))) {
+                    const patched = 'https://fonts.gstatic.com/s/materialicons/v140/flUhRq6tzZclQEJ-Vdg-IuiaDsNc.woff2';
+                    console.log('Font loader patching argument from:', arg, 'to:', patched);
+                    return patched;
+                  }
+                  return arg;
+                });
+                return value.apply(this, patchedArgs);
+              };
+            }
+            return value;
+          }
+        });
+      }
+
+      // 4. Preload the Google Fonts Material Icons
       const link = document.createElement('link');
       link.href = 'https://fonts.googleapis.com/icon?family=Material+Icons';
       link.rel = 'stylesheet';
       document.head.appendChild(link);
-      console.log('Google Fonts link added');
+      console.log('Google Fonts CSS link added');
       
-      console.log('Font loading setup complete');
+      // 5. Also try to load the font directly as a fallback
+      const fontFace = new FontFace(
+        'MaterialIcons',
+        'url(https://fonts.gstatic.com/s/materialicons/v140/flUhRq6tzZclQEJ-Vdg-IuiaDsNc.woff2)'
+      );
+      
+      fontFace.load().then(() => {
+        (document.fonts as any).add(fontFace);
+        console.log('MaterialIcons font loaded successfully from Google Fonts');
+      }).catch((error) => {
+        console.log('Google Fonts loading failed:', error);
+      });
+      
+      console.log('Aggressive font loading setup complete');
     }
   }, []);
 
