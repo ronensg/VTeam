@@ -466,6 +466,7 @@ Jane Smith,6,9,7,8,7,9,Team B,Excellent setter,available`;
           onChangeText={setSearchQuery}
           value={searchQuery}
           style={styles.searchBar}
+          icon={() => <TextIcon name="search" size={20} color={theme.colors.onSurface} />}
         />
         
         <View style={styles.filterRow}>
@@ -562,8 +563,8 @@ Jane Smith,6,9,7,8,7,9,Team B,Excellent setter,available`;
             />
           </Dialog.Content>
           <Dialog.Actions>
-            <Button onPress={() => setShowAddDialog(false)}>Cancel</Button>
-            <Button onPress={handleAddPlayer}>Add Player</Button>
+            <Button onPress={() => setShowAddDialog(false)} icon={() => <TextIcon name="close" size={20} color={theme.colors.onSurface} />}>Cancel</Button>
+            <Button onPress={handleAddPlayer} icon={() => <TextIcon name="add" size={20} color={theme.colors.primary} />}>Add Player</Button>
           </Dialog.Actions>
         </Dialog>
       </Portal>

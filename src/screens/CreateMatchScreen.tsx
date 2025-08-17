@@ -22,6 +22,43 @@ import { useDatabase } from '../services/DatabaseContext';
 import { TeamGenerationService } from '../services/TeamGenerationService';
 import { Player, SkillWeights } from '../types';
 
+// Simple text-based icons that work without fonts
+const TextIcon: React.FC<{ name: string; size?: number; color?: string }> = ({ name, size = 20, color = 'black' }) => {
+  const iconMap: { [key: string]: string } = {
+    'more-vert': '⋮',
+    'edit': '✏️',
+    'delete': '🗑️',
+    'upload': '📤',
+    'download': '📥',
+    'add': '➕',
+    'close': '❌',
+    'check': '✅',
+    'arrow-back': '⬅️',
+    'arrow-forward': '➡️',
+    'menu': '☰',
+    'search': '🔍',
+    'filter-list': '🔧',
+    'sort': '📊',
+    'refresh': '🔄',
+    'settings': '⚙️',
+    'help': '❓',
+    'info': 'ℹ️',
+    'warning': '⚠️',
+    'error': '❌',
+    'success': '✅',
+    'tune': '⚙️',
+    'play': '▶️',
+    'shuffle': '🔀'
+  };
+  
+  const icon = iconMap[name] || '?';
+  return (
+    <Text style={{ fontSize: size, color, textAlign: 'center', lineHeight: size }}>
+      {icon}
+    </Text>
+  );
+};
+
 const CreateMatchScreen: React.FC = () => {
   const theme = useTheme();
   const navigation = useNavigation();
@@ -170,6 +207,7 @@ const CreateMatchScreen: React.FC = () => {
           onChangeText={setSearchQuery}
           value={searchQuery}
           style={styles.searchBar}
+          icon={() => <TextIcon name="search" size={20} color={theme.colors.onSurface} />}
         />
         
         <View style={styles.filterRow}>
@@ -239,7 +277,7 @@ const CreateMatchScreen: React.FC = () => {
           <Button
             mode="outlined"
             onPress={() => setShowWeightsDialog(true)}
-            icon="tune"
+            icon={() => <TextIcon name="tune" size={20} color={theme.colors.primary} />}
           >
             Adjust Skill Weights
           </Button>
@@ -248,7 +286,7 @@ const CreateMatchScreen: React.FC = () => {
             <Button
               mode="contained"
               onPress={handleGenerateTeams}
-              icon="play"
+              icon={() => <TextIcon name="play" size={20} color="white" />}
               style={styles.generateButton}
             >
               Generate Teams ({selectedPlayers.size} selected)

@@ -22,6 +22,42 @@ interface RouteParams {
   previousTeams?: TeamMatch[];
 }
 
+// Simple text-based icons that work without fonts
+const TextIcon: React.FC<{ name: string; size?: number; color?: string }> = ({ name, size = 20, color = 'black' }) => {
+  const iconMap: { [key: string]: string } = {
+    'more-vert': '⋮',
+    'edit': '✏️',
+    'delete': '🗑️',
+    'upload': '📤',
+    'download': '📥',
+    'add': '➕',
+    'close': '❌',
+    'check': '✅',
+    'arrow-back': '⬅️',
+    'arrow-forward': '➡️',
+    'menu': '☰',
+    'search': '🔍',
+    'filter-list': '🔧',
+    'sort': '📊',
+    'refresh': '🔄',
+    'settings': '⚙️',
+    'help': '❓',
+    'info': 'ℹ️',
+    'warning': '⚠️',
+    'error': '❌',
+    'success': '✅',
+    'shuffle': '🔀',
+    'save': '💾'
+  };
+  
+  const icon = iconMap[name] || '?';
+  return (
+    <Text style={{ fontSize: size, color, textAlign: 'center', lineHeight: size }}>
+      {icon}
+    </Text>
+  );
+};
+
 const GeneratedTeamsScreen: React.FC = () => {
   const theme = useTheme();
   const navigation = useNavigation();
@@ -326,7 +362,7 @@ const GeneratedTeamsScreen: React.FC = () => {
       {/* Header */}
       <View style={[styles.header, { backgroundColor: theme.colors.surface }]}>
         <IconButton
-          icon="arrow-left"
+          icon={() => <TextIcon name="arrow-back" size={24} color={theme.colors.onSurface} />}
           size={24}
           onPress={() => navigation.goBack()}
         />
@@ -346,7 +382,7 @@ const GeneratedTeamsScreen: React.FC = () => {
         <Button
           mode="outlined"
           onPress={handleReshuffle}
-          icon="shuffle"
+          icon={() => <TextIcon name="shuffle" size={20} color={theme.colors.primary} />}
           style={styles.reshuffleButton}
           loading={isReshuffling}
           disabled={isReshuffling}
@@ -356,7 +392,7 @@ const GeneratedTeamsScreen: React.FC = () => {
         <Button
           mode="contained"
           onPress={handleSaveMatch}
-          icon="save"
+          icon={() => <TextIcon name="save" size={20} color="white" />}
           style={styles.saveButton}
         >
           Save Match

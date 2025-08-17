@@ -19,6 +19,40 @@ import { FlashList } from '@shopify/flash-list';
 import { useDatabase } from '../services/DatabaseContext';
 import { Team } from '../types';
 
+// Simple text-based icons that work without fonts
+const TextIcon: React.FC<{ name: string; size?: number; color?: string }> = ({ name, size = 20, color = 'black' }) => {
+  const iconMap: { [key: string]: string } = {
+    'more-vert': '⋮',
+    'edit': '✏️',
+    'delete': '🗑️',
+    'upload': '📤',
+    'download': '📥',
+    'add': '➕',
+    'close': '❌',
+    'check': '✅',
+    'arrow-back': '⬅️',
+    'arrow-forward': '➡️',
+    'menu': '☰',
+    'search': '🔍',
+    'filter-list': '🔧',
+    'sort': '📊',
+    'refresh': '🔄',
+    'settings': '⚙️',
+    'help': '❓',
+    'info': 'ℹ️',
+    'warning': '⚠️',
+    'error': '❌',
+    'success': '✅'
+  };
+  
+  const icon = iconMap[name] || '?';
+  return (
+    <Text style={{ fontSize: size, color, textAlign: 'center', lineHeight: size }}>
+      {icon}
+    </Text>
+  );
+};
+
 const TeamManagementScreen: React.FC = () => {
   const theme = useTheme();
   const { teams, addTeam, updateTeam, deleteTeam } = useDatabase();
@@ -245,8 +279,8 @@ const TeamManagementScreen: React.FC = () => {
             />
           </Dialog.Content>
           <Dialog.Actions>
-            <Button onPress={() => setShowAddDialog(false)}>Cancel</Button>
-            <Button onPress={handleAddTeam}>Add Team</Button>
+            <Button onPress={() => setShowAddDialog(false)} icon={() => <TextIcon name="close" size={20} color={theme.colors.onSurface} />}>Cancel</Button>
+            <Button onPress={handleAddTeam} icon={() => <TextIcon name="add" size={20} color={theme.colors.primary} />}>Add Team</Button>
           </Dialog.Actions>
         </Dialog>
       </Portal>
