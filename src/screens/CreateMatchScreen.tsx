@@ -80,6 +80,12 @@ const CreateMatchScreen: React.FC = () => {
   
   const [selectedPlayers, setSelectedPlayers] = useState<Set<string>>(new Set());
   const [showWeightsDialog, setShowWeightsDialog] = useState(false);
+  const [localPlayers, setLocalPlayers] = useState(players);
+
+  // Sync localPlayers with players when they change
+  useEffect(() => {
+    setLocalPlayers(players);
+  }, [players]);
 
   // Check for navigation params when screen comes into focus
   useEffect(() => {
@@ -93,14 +99,14 @@ const CreateMatchScreen: React.FC = () => {
 
   // Filtered and available players
   const filteredPlayers = useMemo(() => {
-    return players.filter(player => {
+    return localPlayers.filter(player => {
       const matchesSearch = player.name.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesTeam = !teamFilter || player.teams.includes(teamFilter);
       const matchesAvailability = availabilityFilter === 'all' || player.availability === availabilityFilter;
       
       return matchesSearch && matchesTeam && matchesAvailability;
     });
-  }, [players, searchQuery, teamFilter, availabilityFilter]);
+  }, [localPlayers, searchQuery, teamFilter, availabilityFilter]);
 
   const availablePlayers = filteredPlayers.filter(p => p.availability === 'available');
 
@@ -114,17 +120,27 @@ const CreateMatchScreen: React.FC = () => {
   };
 
   const handlePlayerToggle = (playerId: string) => {
-    console.log('Toggling player selection:', playerId, 'Current selected:', Array.from(selectedPlayers));
+    console.log('=== PLAYER TOGGLE DEBUG ===');
+    console.log('Toggling player selection:', playerId);
+    console.log('Current selected players:', Array.from(selectedPlayers));
+    console.log('Player exists in current selection:', selectedPlayers.has(playerId));
+    
     const newSelected = new Set(selectedPlayers);
     if (newSelected.has(playerId)) {
       newSelected.delete(playerId);
-      console.log('Removed player from selection:', playerId);
+      console.log('✅ Removed player from selection:', playerId);
     } else {
       newSelected.add(playerId);
-      console.log('Added player to selection:', playerId);
+      console.log('✅ Added player to selection:', playerId);
     }
+    
+    console.log('New selection set:', Array.from(newSelected));
     setSelectedPlayers(newSelected);
-    console.log('New selected set:', Array.from(newSelected));
+    
+    // Force a re-render to ensure state update
+    setTimeout(() => {
+      console.log('State after update - selectedPlayers:', Array.from(selectedPlayers));
+    }, 100);
   };
 
   const handleAvailabilityToggle = async (playerId: string, event: any) => {
@@ -132,21 +148,20 @@ const CreateMatchScreen: React.FC = () => {
     event.stopPropagation();
     
     try {
-      const player = players.find(p => p.id === playerId);
+      const player = localPlayers.find(p => p.id === playerId);
       if (player) {
         const newAvailability = player.availability === 'available' ? 'unavailable' : 'available';
         console.log('Toggling availability for player:', playerId, 'from', player.availability, 'to:', newAvailability);
         
+        // Update the local state to show the change immediately
+        const updatedPlayers = localPlayers.map(p => 
+          p.id === playerId ? { ...p, availability: newAvailability as 'available' | 'unavailable' } : p
+        );
+        setLocalPlayers(updatedPlayers);
+        
         // TODO: Implement actual database update
-        // For now, we'll just log the change
         // You'll need to add an updatePlayer function to your database context
         
-        // Force a re-render by updating the local state
-        // This is a temporary solution until database integration is complete
-        const updatedPlayers = players.map(p => 
-          p.id === playerId ? { ...p, availability: newAvailability } : p
-        );
-        // Note: This won't persist to the database, but will show the UI change
         console.log('Availability updated for player:', playerId, 'to:', newAvailability);
       }
     } catch (error) {
@@ -177,19 +192,23 @@ const CreateMatchScreen: React.FC = () => {
     }
   };
 
-  const renderPlayerCard = ({ item: player }: { item: Player }) => (
-    <Card 
-      style={[
-        styles.playerCard, 
-        { 
-          opacity: player.availability === 'unavailable' ? 0.6 : 1,
-          borderColor: selectedPlayers.has(player.id) ? '#4CAF50' : 'transparent',
-          borderWidth: selectedPlayers.has(player.id) ? 3 : 0,
-          backgroundColor: selectedPlayers.has(player.id) ? '#E8F5E8' : theme.colors.surface,
-        }
-      ]}
-      onPress={() => handlePlayerToggle(player.id)}
-    >
+  const renderPlayerCard = ({ item: player }: { item: Player }) => {
+    const isSelected = selectedPlayers.has(player.id);
+    console.log(`Rendering player ${player.name} (${player.id}) - Selected: ${isSelected}`);
+    
+    return (
+      <Card 
+        style={[
+          styles.playerCard, 
+          { 
+            opacity: player.availability === 'unavailable' ? 0.6 : 1,
+            borderColor: isSelected ? '#4CAF50' : 'transparent',
+            borderWidth: isSelected ? 3 : 0,
+            backgroundColor: isSelected ? '#E8F5E8' : theme.colors.surface,
+          }
+        ]}
+        onPress={() => handlePlayerToggle(player.id)}
+      >
       <Card.Content>
         {/* Player Name */}
         <Text variant="titleMedium" style={[
@@ -232,18 +251,19 @@ const CreateMatchScreen: React.FC = () => {
           </View>
         )}
 
-        {/* Selection Status Indicator */}
-        <View style={styles.selectionStatusContainer}>
-          <Text variant="bodySmall" style={[
-            styles.selectionStatusText,
-            { color: selectedPlayers.has(player.id) ? '#2E7D32' : theme.colors.onSurface }
-          ]}>
-            {selectedPlayers.has(player.id) ? '✓ Selected for Match' : 'Tap to Select'}
-          </Text>
-        </View>
-      </Card.Content>
-    </Card>
-  );
+                 {/* Selection Status Indicator */}
+         <View style={styles.selectionStatusContainer}>
+           <Text variant="bodySmall" style={[
+             styles.selectionStatusText,
+             { color: isSelected ? '#2E7D32' : theme.colors.onSurface }
+           ]}>
+             {isSelected ? '✓ Selected for Match' : 'Tap to Select'}
+           </Text>
+         </View>
+       </Card.Content>
+     </Card>
+     );
+   };
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
@@ -296,11 +316,11 @@ const CreateMatchScreen: React.FC = () => {
             <Text variant="bodyMedium" style={styles.selectionCount}>
               Selected: {selectedPlayers.size} / {availablePlayers.length} available
             </Text>
-            {selectedPlayers.size > 0 && (
-              <Text variant="bodySmall" style={styles.selectedPlayersList}>
-                Selected: {Array.from(selectedPlayers).map(id => players.find(p => p.id === id)?.name).join(', ')}
-              </Text>
-            )}
+                         {selectedPlayers.size > 0 && (
+               <Text variant="bodySmall" style={styles.selectedPlayersList}>
+                 Selected: {Array.from(selectedPlayers).map(id => localPlayers.find(p => p.id === id)?.name).join(', ')}
+               </Text>
+             )}
           </View>
         </View>
 
