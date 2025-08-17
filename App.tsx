@@ -209,10 +209,48 @@ export default function App() {
         logFontEvent('LOG_DOWNLOAD', 'Font log downloaded by user');
       };
 
+      // 9b. Create a function to display logs in console
+      (window as any).showFontLog = () => {
+        console.log('=== FONT LOADING LOG ===');
+        console.log(`Total log entries: ${fontLog.length}`);
+        console.log('Latest 20 entries:');
+        fontLog.slice(-20).forEach((entry, index) => {
+          console.log(`[${index + 1}] ${entry.timestamp} - ${entry.type}: ${entry.message}`);
+          if (entry.url) console.log(`    URL: ${entry.url}`);
+          if (entry.error) console.log(`    Error: ${entry.error}`);
+        });
+        console.log('=== END LOG ===');
+        logFontEvent('LOG_DISPLAY', 'Font log displayed in console');
+      };
+
+      // 9c. Create a function to get log summary
+      (window as any).getFontLogSummary = () => {
+        const summary = {
+          totalEntries: fontLog.length,
+          byType: {} as { [key: string]: number },
+          latestEntries: fontLog.slice(-10),
+          errors: fontLog.filter(entry => entry.error),
+          fontRequests: fontLog.filter(entry => entry.type.includes('FETCH') || entry.type.includes('XHR'))
+        };
+        
+        fontLog.forEach(entry => {
+          summary.byType[entry.type] = (summary.byType[entry.type] || 0) + 1;
+        });
+        
+        console.log('=== FONT LOG SUMMARY ===');
+        console.log(JSON.stringify(summary, null, 2));
+        console.log('=== END SUMMARY ===');
+        
+        return summary;
+      };
+
       // 10. Log the setup completion
       logFontEvent('SETUP_COMPLETE', 'Comprehensive font loading logging setup complete');
       
-      console.log('[FONT-LOG] Setup complete. Use window.downloadFontLog() to download the log file.');
+      console.log('[FONT-LOG] Setup complete. Available functions:');
+      console.log('[FONT-LOG] - window.downloadFontLog() - Download log as JSON file');
+      console.log('[FONT-LOG] - window.showFontLog() - Display latest 20 entries in console');
+      console.log('[FONT-LOG] - window.getFontLogSummary() - Get log summary and statistics');
       console.log('[FONT-LOG] Log entries will be saved to localStorage every 10 entries.');
     }
   }, []);
